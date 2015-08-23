@@ -1,5 +1,5 @@
 # Espanol
-A wrapper libary keeping the WiFi and MQTT connection up under all circumstances
+A wrapper libary for the esp8266 keeping the WiFi and MQTT connection up under all circumstances
 
 ## Features
 * Reestablishes all lost connections
