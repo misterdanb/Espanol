@@ -6,7 +6,7 @@ Espanol::Espanol(char* ssid, char* password, char* broker, int port, void (*call
       _password(password),
       _broker(broker),
       _port(port),
-      _topics({ 0, }),
+      _topics{ 0, },
       _client(),
       _mqtt(broker, port, callback, _client)
 {
