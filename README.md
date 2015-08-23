@@ -1,7 +1,7 @@
 # Espanol
 A wrapper libary keeping the WiFi and MQTT connection up under all circumstances
 
-## Feature
+## Features
 * Reestablishes all lost connections
 * Automatically subscribes topice again when the broker has died for example
 
