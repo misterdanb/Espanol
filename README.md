@@ -13,10 +13,10 @@ A wrapper libary for the esp8266 keeping the WiFi and MQTT connection up under a
 #include <PubSubClient.h>
 #include <Espanol.h>
 
-char* ssid            = "somefunnyssid";
-char* password        = "someunsecurepassword";
-char* broker          = "somecnazyhostname";
-int port              = 1883;
+char* ssid     = "somefunnyssid";
+char* password = "someunsecurepassword";
+char* broker   = "somecnazyhostname";
+int port       = 1883;
 
 Espanol denada(ssid, password, broker, port, callback);
 
