@@ -81,6 +81,21 @@ void Espanol::unsubscribe(char* currentTopic)
     }
 }
 
+boolean Espanol::publish(char* topic, char* payload)
+{
+    return _mqtt.publish(topic, payload);
+}
+
+boolean Espanol::publish(char* topic, uint8_t* payload, unsigned int length);
+{
+    return _mqtt.publish(topic, payload, length);
+}
+
+boolean Espanol::publish(char* topic, uint8_t* payload, unsigned int length, boolean retained)
+{
+    return _mqtt.publish(topic, payload, length, retained);
+}
+
 void Espanol::connectWiFi()
 {
     if (_debug)

@@ -26,7 +26,10 @@ public:
 
     void subscribe(char*);
     void unsubscribe(char*);
-    void publish(char*, char*);
+    boolean publish(char *, char *);
+    boolean publish(char *, uint8_t *, unsigned int);
+    boolean publish(char *, uint8_t *, unsigned int, boolean);
+
 
 private:
     void connectWiFi();
