@@ -3,7 +3,7 @@ A wrapper libary for the esp8266 keeping the WiFi and MQTT connection up under a
 
 This wrapper comes with [knolleary's PubSubClient-Library](https://github.com/knolleary/pubsubclient) preinstalled in form of a [git-subdir](https://github.com/andreyvit/git-subdir).
 
-NOTICE: Currently there is a bug in the PubSubClient-Library, where it won't compile until *PROGMEM* is removed from the *publish_P* method in *PubSubClient.h* and *PubSubClient.cpp*. Also note, that you then can't use this method anymore.
+NOTICE: Currently there is a bug in the PubSubClient-Library, where it won't compile for an ESP8266 until *PROGMEM* is removed from the *publish_P* method in *PubSubClient.h* and *PubSubClient.cpp*.
 
 ## Features
 * Reestablishes all lost connections
