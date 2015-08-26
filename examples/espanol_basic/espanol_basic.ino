@@ -1,6 +1,5 @@
 #include <SPI.h>
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
 #include <Espanol.h>
 
 char* ssid     = "somefunnyssid";
