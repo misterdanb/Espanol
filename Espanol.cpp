@@ -86,7 +86,7 @@ boolean Espanol::publish(char* topic, char* payload)
     return _mqtt.publish(topic, payload);
 }
 
-boolean Espanol::publish(char* topic, uint8_t* payload, unsigned int length);
+boolean Espanol::publish(char* topic, uint8_t* payload, unsigned int length)
 {
     return _mqtt.publish(topic, payload, length);
 }
