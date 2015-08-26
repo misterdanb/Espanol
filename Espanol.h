@@ -11,7 +11,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
+#include "pubsubclient/PubSubClient/PubSubClient.h"
 
 class Espanol
 {
