@@ -7,7 +7,7 @@ NOTICE: Currently there is a bug in the PubSubClient-Library, where it won't com
 
 ## Features
 * Reestablishes all lost connections
-* Automatically subscribes topic again when the broker has died for example
+* Automatically subscribes to the topic again when the broker has died for example
 
 ## Example
 
