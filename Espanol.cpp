@@ -1,28 +1,34 @@
 #include "Espanol.h"
 
-Espanol::Espanol(char* ssid, char* password, char* broker, int port, void (*callback)(char*, uint8_t*, unsigned int))
+_Espanol::_Espanol()
     : _debug(false),
-      _ssid(ssid),
-      _password(password),
-      _broker(broker),
-      _port(port),
-      _topics{ 0, },
+      _topics{ NULL, },
       _client(),
-      _mqtt(broker, port, callback, _client)
+      _mqtt()
 {
 }
 
-void Espanol::setDebug(boolean debug)
+void _Espanol::begin(const char *ssid, const char *password, const char *broker, const int port)
+{
+    _mqtt.setServer(_broker, _port);
+    _mqtt.setCallback(internalCallback);
+}
+
+void _Espanol::end()
+{
+}
+
+void _Espanol::setDebug(bool debug)
 {
     _debug = debug;
 }
 
-boolean Espanol::getDebug()
+bool _Espanol::getDebug()
 {
     return _debug;
 }
 
-void Espanol::loop()
+void _Espanol::loop()
 {
     if (WiFi.status() != WL_CONNECTED)
     {
@@ -37,14 +43,20 @@ void Espanol::loop()
     _mqtt.loop();
 }
 
-boolean Espanol::connected()
+bool _Espanol::connected()
 {
     return (WiFi.status() == WL_CONNECTED) && _mqtt.connected();
 }
 
-void Espanol::subscribe(char* newTopic)
+void _Espanol::setCallback(std::function<void (char *, uint8_t *, unsigned int)> callback)
 {
-    for (char* topic : _topics)
+    _callback = callback;
+    _mqtt.setCallback(internalCallback);
+}
+
+void _Espanol::subscribe(char *newTopic)
+{
+    for (char *topic : _topics)
     {
         if (topic != 0)
         {
@@ -55,7 +67,7 @@ void Espanol::subscribe(char* newTopic)
         }
     }
 
-    for (char*& topic : _topics)
+    for (char *&topic : _topics)
     {
         if (topic == 0)
         {
@@ -67,9 +79,9 @@ void Espanol::subscribe(char* newTopic)
     }
 }
 
-void Espanol::unsubscribe(char* currentTopic)
+void _Espanol::unsubscribe(char *currentTopic)
 {
-    for (char*& topic : _topics)
+    for (char *&topic : _topics)
     {
         if (strcmp(topic, currentTopic) == 0)
         {
@@ -81,22 +93,22 @@ void Espanol::unsubscribe(char* currentTopic)
     }
 }
 
-boolean Espanol::publish(char* topic, char* payload)
+bool _Espanol::publish(char *topic, char *payload)
 {
     return _mqtt.publish(topic, payload);
 }
 
-boolean Espanol::publish(char* topic, uint8_t* payload, unsigned int length)
+bool _Espanol::publish(char *topic, uint8_t* payload, unsigned int length)
 {
     return _mqtt.publish(topic, payload, length);
 }
 
-boolean Espanol::publish(char* topic, uint8_t* payload, unsigned int length, boolean retained)
+bool _Espanol::publish(char *topic, uint8_t* payload, unsigned int length, bool retained)
 {
     return _mqtt.publish(topic, payload, length, retained);
 }
 
-void Espanol::connectWiFi()
+void _Espanol::connectWiFi()
 {
     if (_debug)
     {
@@ -125,13 +137,13 @@ void Espanol::connectWiFi()
     }
 }
 
-void Espanol::connectMQTT()
+void _Espanol::connectMQTT()
 {
     String clientName;
     clientName += "esp8266-";
     clientName += String(micros() & 0xffff, 16);
 
-    char* clientNameCharArray = new char[clientName.length() + 1];
+    char *clientNameCharArray = new char[clientName.length() + 1];
     clientName.toCharArray(clientNameCharArray, clientName.length());
 
     if (_debug)
@@ -155,7 +167,7 @@ void Espanol::connectMQTT()
         Serial.println("Connected to MQTT broker");
     }
 
-    for (char* topic : _topics)
+    for (char *topic : _topics)
     {
         if (topic != 0)
         {
@@ -163,3 +175,10 @@ void Espanol::connectMQTT()
         }
     }
 }
+
+void _Espanol::internalCallback(char *topic, uint8_t *bytes, unsigned int length)
+{
+    Espanol._callback(topic, bytes, length);
+}
+
+_Espanol Espanol;

@@ -12,6 +12,8 @@ Espanol	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+begin 	KEYWORD2
+end 	KEYWORD2
 setDebug 	KEYWORD2
 getDebug 	KEYWORD2
 publish 	KEYWORD2
@@ -19,6 +21,7 @@ subscribe 	KEYWORD2
 unsubscribe 	KEYWORD2
 loop 	KEYWORD2
 connected 	KEYWORD2
+setCallback 	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

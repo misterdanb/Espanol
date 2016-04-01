@@ -8,35 +8,45 @@
 #ifndef Espanol_h
 #define Espanol_h
 
+#include <functional>
 #include <Arduino.h>
 #include <stdint.h>
 #include <ESP8266WiFi.h>
 #include "utility/PubSubClient.h"
 
-class Espanol
+class _Espanol
 {
 public:
-    Espanol(char*, char*, char*, int, void (*)(char*, uint8_t*, unsigned int));
+    _Espanol();
 
-    void setDebug(boolean);
-    boolean getDebug();
+    void begin(const char *ssid, const char *password, const char *broker, const int port);
+    void end();
+
+    void setDebug(bool);
+    bool getDebug();
 
     void loop();
-    boolean connected();
+    bool connected();
 
-    void subscribe(char*);
-    void unsubscribe(char*);
-    boolean publish(char *, char *);
-    boolean publish(char *, uint8_t *, unsigned int);
-    boolean publish(char *, uint8_t *, unsigned int, boolean);
+    void setCallback(std::function<void (char *, uint8_t *, unsigned int)>);
 
+    void subscribe(char *);
+    void unsubscribe(char *);
+    bool publish(char *, char *);
+    bool publish(char *, uint8_t *, unsigned int);
+    bool publish(char *, uint8_t *, unsigned int, bool);
 
 private:
     void connectWiFi();
     void connectMQTT();
 
+    static void internalCallback(char *, uint8_t *, unsigned int);
+
+public:
+    std::function<void (char *, uint8_t *, unsigned int)> _callback;
+
 private:
-    boolean _debug;
+    bool _debug;
     char* _ssid;
     char* _password;
     char* _broker;
@@ -45,5 +55,7 @@ private:
     WiFiClient _client;
     PubSubClient _mqtt;
 };
+
+extern _Espanol Espanol;
 
 #endif
