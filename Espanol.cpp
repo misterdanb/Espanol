@@ -2,15 +2,29 @@
 
 _Espanol::_Espanol()
     : _debug(false),
-      _topics{ NULL, },
+      _hostname("esp8266"),
+      _topics{ "", },
       _client(),
-      _mqtt()
+      _mqtt(_client)
 {
+    for (int i = 0; i < 10; i++)
+    {
+        _topics[i] = "";
+    }
 }
 
-void _Espanol::begin(const char *ssid, const char *password, const char *broker, const int port)
+void _Espanol::begin(String ssid, String password, String hostname, String broker, const int port)
 {
-    _mqtt.setServer(_broker, _port);
+    _ssid = ssid;
+    _password = password;
+    _hostname = hostname;
+    _broker = broker;
+    _port = port;
+
+    WiFi.hostname(_hostname);
+    WiFi.mode(WIFI_STA);
+
+    _mqtt.setServer(_broker.c_str(), _port);
     _mqtt.setCallback(internalCallback);
 }
 
@@ -30,12 +44,9 @@ bool _Espanol::getDebug()
 
 void _Espanol::loop()
 {
-    if (WiFi.status() != WL_CONNECTED)
-    {
-        connectWiFi();
-    }
+    connectWiFi();
 
-    if (!_mqtt.connected())
+    if (WiFi.status() == WL_CONNECTED)
     {
         connectMQTT();
     }
@@ -54,126 +65,178 @@ void _Espanol::setCallback(std::function<void (char *, uint8_t *, unsigned int)>
     _mqtt.setCallback(internalCallback);
 }
 
-void _Espanol::subscribe(char *newTopic)
+void _Espanol::subscribe(String newTopic)
 {
-    for (char *topic : _topics)
+    for (String topic : _topics)
     {
-        if (topic != 0)
+        if (topic.equals(newTopic))
         {
-            if (strcmp(topic, newTopic) == 0)
+            return;
+        }
+    }
+
+    for (int i = 0; i < 10; i++)
+    {
+        if (_topics[i].equals(""))
+        {
+            _topics[i] = newTopic;
+
+            if (_mqtt.connected())
             {
-                return;
+                _mqtt.subscribe(newTopic.c_str());
             }
-        }
-    }
-
-    for (char *&topic : _topics)
-    {
-        if (topic == 0)
-        {
-            topic = newTopic;
-            _mqtt.subscribe(newTopic);
 
             return;
         }
     }
 }
 
-void _Espanol::unsubscribe(char *currentTopic)
+void _Espanol::unsubscribe(String currentTopic)
 {
-    for (char *&topic : _topics)
+    for (int i = 0; i < 10; i++)
     {
-        if (strcmp(topic, currentTopic) == 0)
+        if (_topics[i].equals(currentTopic))
         {
-            _mqtt.unsubscribe(currentTopic);
-            topic = 0;
+            _mqtt.unsubscribe(currentTopic.c_str());
+            _topics[i] = "";
 
             return;
         }
     }
 }
 
-bool _Espanol::publish(char *topic, char *payload)
+bool _Espanol::publish(String topic, String payload)
 {
-    return _mqtt.publish(topic, payload);
+    return _mqtt.publish(topic.c_str(), payload.c_str());
 }
 
-bool _Espanol::publish(char *topic, uint8_t* payload, unsigned int length)
+bool _Espanol::publish(String topic, uint8_t *payload, unsigned int length)
 {
-    return _mqtt.publish(topic, payload, length);
+    return _mqtt.publish(topic.c_str(), payload, length);
 }
 
-bool _Espanol::publish(char *topic, uint8_t* payload, unsigned int length, bool retained)
+bool _Espanol::publish(String topic, uint8_t *payload, unsigned int length, bool retained)
 {
-    return _mqtt.publish(topic, payload, length, retained);
+    return _mqtt.publish(topic.c_str(), payload, length, retained);
 }
 
 void _Espanol::connectWiFi()
 {
-    if (_debug)
-    {
-        Serial.print("Connecting to ");
-        Serial.println(_ssid);
-    }
+    static int lastConnectedState = -1;
+    static bool connectingToWiFi = false;
+    static int lastMillis = millis();
 
-    WiFi.begin(_ssid, _password);
-
-    while (WiFi.status() != WL_CONNECTED)
+    if (lastConnectedState != WL_CONNECTED && !connectingToWiFi)
     {
-        delay(500);
+        connectingToWiFi = true;
 
         if (_debug)
         {
-            Serial.print(".");
+            Serial.print("Connecting to ");
+            Serial.print(_ssid);
+            Serial.print(" with passphrase ");
+            Serial.println(_password);
+        }
+
+        WiFi.begin(_ssid.c_str(), _password.c_str());
+    }
+    else
+    {
+        if (WiFi.status() != WL_CONNECTED)
+        {
+            if (_debug)
+            {
+                int newMillis = millis();
+
+                if (newMillis - lastMillis > 5000)
+                {
+                    lastMillis = newMillis;
+                    Serial.print(".");
+                }
+            }
+        }
+        else
+        {
+            connectingToWiFi = false;
         }
     }
 
-    if (_debug)
+    if (lastConnectedState != WL_CONNECTED && WiFi.status() == WL_CONNECTED)
     {
-        Serial.println();
-        Serial.println("WiFi connected");
-        Serial.println("IP address: ");
-        Serial.println(WiFi.localIP());
+        if (_debug)
+        {
+            Serial.println();
+            Serial.println("WiFi connected");
+            Serial.println("IP address: ");
+            Serial.println(WiFi.localIP());
+        }
     }
+
+    lastConnectedState = WiFi.status();
 }
 
 void _Espanol::connectMQTT()
 {
-    String clientName;
-    clientName += "esp8266-";
-    clientName += String(micros() & 0xffff, 16);
+    static int lastConnectedState = false;
+    static bool connectingToMQTT = false;
+    static int lastMillis = millis();
 
-    char *clientNameCharArray = new char[clientName.length() + 1];
-    clientName.toCharArray(clientNameCharArray, clientName.length());
-
-    if (_debug)
+    if (!lastConnectedState && !connectingToMQTT)
     {
-        Serial.print("Connecting to broker");
-    }
-
-    while (!_mqtt.connect(clientNameCharArray))
-    {
-        delay(500);
+        connectingToMQTT = true;
 
         if (_debug)
         {
-            Serial.print(".");
+            Serial.print("Connecting to broker");
         }
     }
-
-    if (_debug)
+    else
     {
-        Serial.println();
-        Serial.println("Connected to MQTT broker");
-    }
-
-    for (char *topic : _topics)
-    {
-        if (topic != 0)
+        if (!_mqtt.connected())
         {
-            _mqtt.subscribe(topic);
+            int newMillis = millis();
+
+            if (newMillis - lastMillis > 1000)
+            {
+                bool succeeded = _mqtt.connect(_hostname.c_str());
+
+                if (!succeeded && _debug)
+                {
+                    Serial.print(".");
+                }
+
+                if (succeeded)
+                {
+                    connectingToMQTT = false;
+                }
+
+                lastMillis = newMillis;
+            }
+        }
+        else
+        {
+            connectingToMQTT = false;
         }
     }
+
+    if (!lastConnectedState && _mqtt.connected())
+    {
+        for (String topic : _topics)
+        {
+            if (!topic.equals(""))
+            {
+                _mqtt.subscribe(topic.c_str());
+            }
+        }
+
+        if (_debug)
+        {
+            Serial.println();
+            Serial.println("Connected to MQTT broker");
+        }
+    }
+
+    lastConnectedState = _mqtt.connected();
 }
 
 void _Espanol::internalCallback(char *topic, uint8_t *bytes, unsigned int length)

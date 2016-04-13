@@ -19,7 +19,7 @@ class _Espanol
 public:
     _Espanol();
 
-    void begin(const char *ssid, const char *password, const char *broker, const int port);
+    void begin(String, String, String, String, int);
     void end();
 
     void setDebug(bool);
@@ -30,11 +30,11 @@ public:
 
     void setCallback(std::function<void (char *, uint8_t *, unsigned int)>);
 
-    void subscribe(char *);
-    void unsubscribe(char *);
-    bool publish(char *, char *);
-    bool publish(char *, uint8_t *, unsigned int);
-    bool publish(char *, uint8_t *, unsigned int, bool);
+    void subscribe(String);
+    void unsubscribe(String);
+    bool publish(String, String);
+    bool publish(String, uint8_t *, unsigned int);
+    bool publish(String, uint8_t *, unsigned int, bool);
 
 private:
     void connectWiFi();
@@ -47,11 +47,12 @@ public:
 
 private:
     bool _debug;
-    char* _ssid;
-    char* _password;
-    char* _broker;
+    String _ssid;
+    String _password;
+    String _hostname;
+    String _broker;
     int _port;
-    char* _topics[20];
+    String _topics[10];
     WiFiClient _client;
     PubSubClient _mqtt;
 };
