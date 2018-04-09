@@ -18,7 +18,7 @@ NOTICE: Currently there is a bug in the PubSubClient-Library, where it won't com
 String ssid     = "somefunnyssid";
 String password = "someunsecurepassword";
 String broker   = "somecrazyhostname";
-String hostname = "somecoolhostname"
+String hostname = "somecoolhostname";
 
 int port        = 1883;
 
